@@ -1,0 +1,49 @@
+<div class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden background">
+    <div class="flex flex-column align-items-center justify-content-center">
+      <div style="border-radius:56px; padding:0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%);">
+            <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius:53px">
+                <div class="text-center mb-5">
+                    <img src="assets/layout/images/zoomlogo.jpeg" alt="Image" height="170" class="mb-3 border-circle">
+                    <div class="text-900 text-3xl font-medium mb-3">¡Bienvenida, Katherine!</div>
+                    <span class="text-600 font-medium">Inicia sesión para continuar</span>
+                    <p-messages [value]="msgs"></p-messages>
+                </div>
+
+                <div>
+                    <label for="email1" class="block text-900 text-xl font-medium mb-2">Correo Electronico</label>
+                    <input id="email1" type="text"  [(ngModel)]="usuario.email" placeholder="Correo electronico" pInputText class="w-full md:w-30rem mb-2" style="padding:1rem">
+                    <div *ngIf="usuario.errors.email" class="bg-red-400 w-full border-round">
+                        <label class="block text-900 text-l font-medium mb-2 text-white"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.usuario.errors.email }}</label>
+                    </div>
+                    <label for="password1" class="block text-900 font-medium text-xl mb-2 mt-5">Contraseña</label>
+                    <p-password id="password1" [(ngModel)]="usuario.password" placeholder="Contraseña" [toggleMask]="true" [feedback]="false" styleClass="mb-2" inputStyleClass="w-full p-3 md:w-30rem"></p-password>
+                    <div *ngIf="usuario.errors.password" class="bg-red-400 w-full border-round">
+                        <label class="block text-900 text-l font-medium mb-2 text-white"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.usuario.errors.password }}</label>
+                    </div>
+                    <div class="flex align-items-center justify-content-between mb-5 gap-5">
+                        <div class="flex align-items-center mt-3">
+
+                        </div>
+                        <a class="font-medium no-underline ml-2 text-right cursor-pointer mt-3" style="color: var(--primary-color)" (click)="openNew()">¿Olvidaste tu contraseña?</a>
+                    </div>
+                    <button pButton pRipple label="Iniciar sesion" class="w-full p-3 text-xl" (click)="login(usuario)"></button>
+                    <p-toast key="tst"></p-toast>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p-dialog [(visible)]="dialog" [style]="{width: '450px'}" header="¿Te olvidaste de tu contraseña?" [modal]="true" class="p-fluid">
+            <ng-template pTemplate="content">
+                <div class="field">
+                    <label for="name">Ingresa tu correo electronico, por favor:</label>
+                    <input type="text" pInputText id="name" [(ngModel)]="sendmail" required autofocus placeholder="Ej: correo@dominio.com"/>
+                    <p-messages [value]="err"></p-messages>
+                    <button pButton pRipple label="Enviar" icon="pi pi-send" class=" mt-1 btn p-button-success" (click)="sendemail()"></button>
+                </div>
+                            </ng-template>
+
+            <ng-template pTemplate="footer">
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+            </ng-template>
+        </p-dialog>
+</div>

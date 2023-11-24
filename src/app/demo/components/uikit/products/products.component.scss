@@ -1,0 +1,25 @@
+.custom-input:disabled {
+    opacity: 1; /* Cambia la opacidad para indicar que está deshabilitado */
+    cursor: normal; /* Cambia el cursor para indicar que no se puede interactuar */
+}
+
+.p-button-custom {
+    color: #ffffff;
+    background: #6366F1;
+    border: 1px solid #6366F1;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+    border-radius: 6px;
+}
+
+.p-button-custom:hover {
+    background: #4F46E5;
+    color: #ffffff;
+    border-color: #4F46E5;
+}
+
+.p-button-custom:focus {
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #b1b3f8, 0 1px 2px 0 black;
+}
+

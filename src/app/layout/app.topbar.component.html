@@ -1,0 +1,29 @@
+<div class="layout-topbar">
+    <a class="layout-topbar-logo" routerLink="">
+        <img src="assets/layout/images/zoomlogo.jpeg" alt="logo" class="mr-2 border-circle" height="50px">
+        <span>K&J Articulos Online</span>
+    </a>
+
+    <button #menubutton class="p-link layout-menu-button layout-topbar-button" (click)="layoutService.onMenuToggle()">
+        <i class="pi pi-bars"></i>
+    </button>
+
+    <button #topbarmenubutton class="p-link layout-topbar-menu-button layout-topbar-button" (click)="layoutService.showProfileSidebar()">
+        <i class="pi pi-ellipsis-v"></i>
+    </button>
+
+    <div #topbarmenu class="layout-topbar-menu" [ngClass]="{'layout-topbar-menu-mobile-active': layoutService.state.profileSidebarVisible}">
+        <button class="p-link layout-topbar-button" [routerLink]="'/uikit/perfil'">
+            <i class="pi pi-user"></i>
+            <span>Profile</span>
+        </button>
+        <p-overlayPanel #op [style]="{'width': '500px'}" >
+
+           <app-notificaciones></app-notificaciones>
+           </p-overlayPanel>
+        <button class="p-link layout-topbar-button" (click)="op.toggle($event)" >
+            <i class="pi pi-bell">{{notificaciones}}</i>
+            <span>Notificaciones</span>
+        </button>
+    </div>
+</div>

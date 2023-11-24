@@ -1,0 +1,90 @@
+<p-dialog [(visible)]="product.show" [style]="{width: '500px','max-width': '750px'}" header="Producto" [modal]="true" class="p-fluid" (onHide)="hideProductDialog()">
+    <ng-template pTemplate="content">
+        <img class="w-9 sm:w-16rem xl:w-10rem shadow-2 block xl:block mx-auto border-round" [src]="'http://localhost:8000/api/images/' + product.imagen" [alt]="product.nombre" height="150px" *ngIf="product.imagen !== undefined && !imageUrl && product.imagen !== '' && product.imagen !== 'null'"/>
+        <img class="w-9 sm:w-16rem xl:w-10rem shadow-2 block xl:block mx-auto border-round" [src]="imageUrl" *ngIf="imageUrl" alt="no-image" height="150px"/>
+        <img class="w-9 sm:w-16rem xl:w-10rem shadow-2 block xl:block mx-auto border-round" src="assets/demo/images/product/undefined.jpg" alt="no-image" *ngIf="product.imagen === undefined && !imageUrl|| product.imagen=== '' && !imageUrl ||  product.imagen=== 'null' && !imageUrl"/>
+        <div class="mb-3">
+            <label for="formFile" pButton class="p-button p-button-custom mt-2" pButton pRipple icon="pi pi-upload  " label="{{ imageLabel }}" tabindex="true" *ngIf="product.action === 'update' || product.action === 'create'"></label>
+            <input class="form-control" type="file" id="formFile" (change)="seleccionarImagen($event)" accept="image/*" hidden>
+        </div>
+        <br>
+
+        <div class="field">
+            <label for="name">Nombre del producto:</label>
+            <input type="text" pInputText id="name" class="custom-input mb-1" [(ngModel)]="product.nombre" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !product.nombre}" [disabled]="product.action === ''"/>
+            <small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.nombre"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.nombre }} </small>
+        </div>
+        <div class="formgrid grid">
+            <div class="field col">
+                <label for="categoria">Categoria</label>
+                <p-dropdown [options]="categorias" [disabled]="product.action === ''" class="custom-input" [(ngModel)] = "product.categoria" optionLabel="nombre" appendTo="body"></p-dropdown>
+            </div>
+        <div class="field col">
+            <label for="name">Precio Unitario:</label>
+            <input type="number" pInputText id="name" class="custom-input mb-1" [(ngModel)]="product.precioUnitario" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !product.precioUnitario}" [disabled]="product.action === ''"/>
+            <small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.precioUnitario"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.precioUnitario }} </small>
+        </div>
+        </div>
+        <div class="field">
+            <label for="name">Descripcion:</label>
+            <textarea rows="3" cols="30" placeholder="Your Message" pInputTextarea class="custom-input mb-1" [(ngModel)]="product.descripcion" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !product.nombre}" [disabled]="product.action === ''"></textarea>
+            <small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.descripcion"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.descripcion }} </small>
+        </div>
+        <div class="formgrid grid">
+            <div class="field col" *ngIf="product.action === ''">
+                <label for="name">Precio Total:</label>
+                <input type="text" pInputText id="name" class="custom-input" [(ngModel)]="product.precioTotal" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !product.precioTotal}" [disabled]="product.action === ''"/>
+                <small class="ng-dirty ng-invalid" *ngIf="submitted && !product.precioTotal">Es necesario un nombre de empresa.</small>
+            </div>
+            <div class="field col" *ngIf="product.action === 'update' || product.action === 'create'">
+                <label for="name">cantidad:</label>
+                <input type="text" pInputText id="cantidad" class="custom-input mb-1" [(ngModel)]="product.cantidad" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !product.cantidad}" [disabled]="product.action === 'update'"/>
+                <small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.cantidad"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.cantidad }} </small>
+            </div>
+            <div class="field col"*ngIf="product.action !== 'create'">
+                <label for="estado">Estado:</label>
+                <p-dropdown [options]="estados" [(ngModel)]="selectedStatus" appendTo="body" [disabled]="product.action === '' || product.action === 'update'">
+                    <ng-template pTemplate="selectedItem">
+                        <div class="flex align-items-center gap-2" [class]="'product-badge status-' + selectedStatus.val">
+                            <div>{{ selectedStatus.label }}</div>
+                        </div>
+                    </ng-template>
+                </p-dropdown>
+            </div>
+
+            <div class="field col" *ngIf="product.action === 'create'">
+                <label for="categoria">Proveedor</label>
+                <p-dropdown [options]="proveedores" class="custom-input" [(ngModel)] = "product.proveedor" optionLabel="nombre" appendTo="body"></p-dropdown>
+            </div>
+
+        </div>
+      </ng-template>
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Guardar" icon="pi pi-save" class="p-button-text" (click)="CreateOrUpdate()" *ngIf="product.action === 'create'"></button>
+        <button pButton pRipple label="Actualizar" icon="pi pi-save" class="p-button-text" (click)="CreateOrUpdate()" *ngIf="product.action === 'update'"></button>
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideProductDialog()"></button>
+    </ng-template>
+</p-dialog>
+
+<!--Modal de los detalles-->
+<p-dialog [(visible)]="detalleModal.show" [modal]="true" [style]="{width: '500px','max-width': '750px'}" header="Producto" class="p-fluid" (onHide)="hideDetailDialog()">
+    <ng-template pTemplate="content">
+        <div class="formgrid grid">
+            <div class="field col">
+                <div class="field col">
+                    <label for="proveedor">Proveedor</label>
+                    <p-dropdown [options]="proveedoresId" class="custom-input" [required]="true" [(ngModel)] = "detalleModal.proveedor" optionLabel="nombre" appendTo="body" placeholder="Selecciona un proveedor"></p-dropdown>
+                </div>
+            <div class="field col">
+                <label for="cantidad">cantidad:</label>
+                <input type="text" pInputText id="cantidad" class="custom-input" [required]="true" [(ngModel)]="detalleModal.cantidad" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !product.cantidad}" [disabled]="product.action === 'update'" />
+                <small class="ng-dirty ng-invalid" *ngIf="submitted && !product.precioTotal">Es necesario ingresar una cantidad.</small>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Guardar" icon="pi pi-save" class="p-button-text" (click)="addNewDetails()"></button>
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDetailDialog()"></button>
+    </ng-template>
+</p-dialog>

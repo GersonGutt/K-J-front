@@ -1,0 +1,186 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+			<h5>Vender Productos</h5>
+            <p-toast></p-toast>
+			<p-dataView #dv [value]="products" [paginator]="true" [rows]="9" filterBy="nombre" [sortField]="sortField" [sortOrder]="sortOrder" layout="grid">
+				<ng-template pTemplate="header">
+					<div class="flex flex-column md:flex-row md:justify-content-between gap-2">
+                        <p-button icon="pi pi-shopping-cart" (click)="newCartView()">
+                                <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
+                        </p-button><span class="mb-3" class="topbar-badge" (click)="newCartView()">{{ cart.productos.length }}</span>
+						<span class="p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input type="search" pInputText placeholder="Buscar por nombre" (input)="onFilter(dv, $event)">
+                        </span>
+						<p-dataViewLayoutOptions></p-dataViewLayoutOptions>
+					</div>
+				</ng-template>
+
+				<ng-template let-product pTemplate="listItem">
+					<div class="col-12">
+						<div class="flex flex-column md:flex-row align-items-center p-3 w-full">
+                            <img [src]="'http://localhost:8000/api/images/' + product.imagen" [alt]="product.name" class="my-4 md:my-0 w-9 md:w-10rem shadow-2 mr-5" height="140" *ngIf="product.imagen !== 'null'"/>
+                            <img  src="assets/demo/images/product/undefined.jpg" alt="no-image" *ngIf="product.imagen === undefined|| product.imagen=== '' ||  product.imagen === 'null'" class="my-4 md:my-0 w-9 md:w-10rem shadow-2 mr-5" />
+							<div class="flex-1 flex flex-column align-items-center text-center md:text-left">
+								<div class="font-bold text-2xl">{{product.nombre}}</div>
+								<div class="mb-2" style="max-width: 300px;">{{product.descripcion}}</div>
+								<!----p-rating [ngModel]="product.rating" [readonly]="true" [cancel]="false" styleClass="mb-2"></!-p-rating-->
+								<div class="flex align-items-center mt-2">
+									<i class="pi pi-tag mr-2"></i>
+									<span class="font-semibold">{{product.categoria.nombre}}</span>
+								</div>
+							</div>
+							<div class="flex flex-row md:flex-column justify-content-between w-full md:w-auto align-items-center md:align-items-end mt-5 md:mt-0">
+								<span class="text-2xl font-semibold mb-2 align-self-center md:align-self-end">${{product.precioUnitario}}</span>
+								<p-button icon="pi pi-shopping-bag" label="Añadir al carrito" [disabled]="product.cantidad === 0" styleClass="mb-2 p-button-sm" (onClick)="openNew(product)"></p-button>
+								<span [ngClass]="product.estado === 'S' ? 'product-badge status-instock' : (product.estado === 'O' ? 'product-badge status-outofstock' : 'product-badge status-lowstock')">{{
+                                    product.estado === 'S' ? 'Disponible: ' :
+                                    product.estado === 'O' ? 'Sin existencias: ' :
+                                    product.estado === 'L' ? 'Pocas existencias: ' :
+                                    '' }}{{ product.cantidad }}</span>
+							</div>
+						</div>
+					</div>
+				</ng-template>
+
+				<ng-template let-product pTemplate="gridItem">
+					<div class="col-12 md:col-4">
+						<div class="card m-3 border-1 surface-border">
+							<div class="flex flex-wrap gap-2 align-items-center justify-content-between mb-2">
+								<div class="flex align-items-center">
+									<i class="pi pi-tag mr-2"></i>
+									<span class="font-semibold">{{product.categoria.nombre}}</span>
+								</div>
+								<span [ngClass]="product.estado === 'S' ? 'product-badge status-instock' : (product.estado === 'O' ? 'product-badge status-outofstock' : 'product-badge status-lowstock')">{{
+                                    product.estado === 'S' ? 'Disponible: ' :
+                                    product.estado === 'O' ? 'Sin existencias: ' :
+                                    product.estado === 'L' ? 'Pocas existencias: ' :
+                                    '' }}{{ product.cantidad }}</span>
+							</div>
+							<div class="flex flex-column align-items-center text-center mb-3">
+                                <div class="w-9 shadow-2 my-3 mx-0 image-container">
+                                    <img [src]="'http://localhost:8000/api/images/' + product.imagen" [alt]="product.name" class="w-full h-full" *ngIf="product.imagen !== 'null'"/>
+                            <img  src="assets/demo/images/product/undefined.jpg" alt="no-image" *ngIf="product.imagen === undefined|| product.imagen=== '' ||  product.imagen === 'null'" class="w-full h-full" />
+                                </div>
+								<div class="text-2xl font-bold">{{product.nombre}}</div>
+								<div class="mb-3">{{product.descripcion.substr(0, 40) + '...'}}</div>
+								<!--p-rating [ngModel]="product.rating" [readonly]="true" [cancel]="false"></-p-rating-->
+							</div>
+							<div class="flex align-items-center justify-content-between">
+								<span class="text-2xl font-semibold">${{product.precioUnitario}}</span>
+								<p-button icon="pi pi-shopping-bag" [disabled]="product.cantidad === 0" (onClick)="openNew(product)"></p-button>
+							</div>
+						</div>
+					</div>
+				</ng-template>
+			</p-dataView>
+		</div>
+	</div>
+
+    <p-dialog [(visible)]="addProductModal" [modal]="true" [style]="{width: '500px','max-width': '750px'}" header="Producto" class="p-fluid">
+        <ng-template pTemplate="content">
+            <div class="w-full h-full">
+                <div class="card m-3">
+                    <div class="flex flex-wrap gap-2 align-items-center justify-content-between mb-2">
+                        <div class="flex align-items-center">
+                            <i class="pi pi-tag mr-2"></i>
+                            <span class="font-semibold">{{product.categoria.nombre}}</span>
+                        </div>
+                        <span [ngClass]="product.estado === 'S' ? 'product-badge status-instock' : (product.estado === 'O' ? 'product-badge status-outofstock' : 'product-badge status-lowstock')">{{
+                            product.estado === 'S' ? 'Disponible: ' :
+                            product.estado === 'O' ? 'Sin existencias: ' :
+                            product.estado === 'L' ? 'Pocas existencias: ' :
+                            '' }}{{ product.cantidad }}</span>
+                    </div>
+                    <div class="flex flex-column align-items-center text-center mb-3">
+                        <div class="w-9 shadow-2 my-3 mx-0 image-container">
+                            <img [src]="'http://localhost:8000/api/images/' + product.imagen" [alt]="product.nombre" class="w-full h-full" *ngIf="product.imagen !== 'null'"/>
+                    <img  src="assets/demo/images/product/undefined.jpg" alt="no-image" *ngIf="product.imagen === undefined|| product.imagen=== '' ||  product.imagen === 'null'" class="w-full h-full" />
+                        </div>
+                        <div class="text-2xl font-bold">{{product.nombre}}</div>
+                        <div class="mb-2">{{product.descripcion}}</div>
+                        <!--p-rating [ngModel]="product.rating" [readonly]="true" [cancel]="false"></-p-rating-->
+                    </div>
+                    <div class="flex align-items-center justify-content-between">
+                        <span class="text-2xl font-semibold">${{product.precioUnitario}}</span>
+                    </div>
+                    <h5>Selecciona productos del inventario</h5>
+			<p-multiSelect [options]="product.detalle_producto!" [(ngModel)]="selectedDetail" placeholder="agrega productos" optionLabel="clave" class="multiselect-custom" display="chip" appendTo="body">
+				<ng-template let-detalle pTemplate="item">
+					<div class="flex align-items-center">
+						<span class="ml-2">Clave:{{detalle.clave}}, Proveedor:{{ detalle.proveedor.nombre }}</span>
+					</div>
+				</ng-template>
+			</p-multiSelect>
+                </div>
+            </div>
+          </ng-template>
+        <ng-template pTemplate="footer">
+            <button pButton pRipple label="Agregar al carrito" icon="pi pi-shopping-cart" class="p-button-text" (click)="addToCart()"></button>
+            <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideView()"></button>
+        </ng-template>
+    </p-dialog>
+
+    <!--TODO::Modal Cart-->
+    <p-dialog [(visible)]="cartView" [style]="{ width: '550px' }" header="Carrito de compras" [modal]="true" styleClass="p-fluid">
+        <ng-template pTemplate="content">
+            <div class="field">
+                <label for="name">Cliente:</label>
+                <input type="text" pInputText id="name" placeholder="Nombre del cliente" class="custom-input mb-1" [(ngModel)]="cart.cliente" required autofocus [ngClass]="{'ng-invalid ng-dirty' : !product.nombre}" />
+                <small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.cliente"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.cliente }} </small>
+                <!----small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.nombre"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.nombre }} </!-small-->
+            </div>
+            <div class="formgrid grid row">
+                <div class="field col-6">
+                    <label for="name">Direccion:</label>
+                    <input type="text" pInputText id="name" placeholder="Digite la direccion del cliente" class="custom-input mb-1" [(ngModel)]="cart.direccion" required autofocus [ngClass]="{'ng-invalid ng-dirty' : !product.nombre}"/>
+                    <small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.direccion"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.direccion }} </small>
+                </div>
+                <div class="field col-6">
+                    <label for="name">DUI:</label>
+                    <input type="text" pInputText id="name" placeholder="12345678-9" class="custom-input mb-1" [(ngModel)]="cart.dui" required autofocus [ngClass]="{'ng-invalid ng-dirty' : !product.nombre}"/>
+                    <small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.dui"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.dui }} </small>
+                </div>
+            </div>
+            <div class="formgrid grid row">
+                <div class="field col-6">
+                    <label for="fechaOrden"><b>Fecha Venta: </b>{{this.cart.fechaVenta | date: "EEEE dd/MM/yyyy"}}</label>
+                </div>
+            </div>
+            <div class="formgrid grid">
+                <p-table [value]="cart.productos" styleClass="p-datatable-gridlines" [tableStyle]="{ 'min-width': '38rem' }">
+                    <ng-template pTemplate="caption">Carrito</ng-template>
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Cantidad</th>
+                            <th>SubTotal</th>
+                            <th></th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item>
+                        <tr>
+                            <td>{{item.nombre}}, {{item.descripcion}}</td>
+                            <td>{{item.precioUnitario | currency: 'USD'}}</td>
+                            <td class="text-center">{{item.detalle_producto?.length}}</td>
+                            <td>{{item.precioUnitario * item.detalle_producto!.length | currency: 'USD'}}</td>
+                            <td>
+                                <p-button icon="pi pi-times" styleClass="p-button-rounded-danger p-button-text" (click)="deleteItem(item)"></p-button>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="summary">
+                        <td colspan="3"><b>Total de la Venta: </b></td>
+                        <td class="right-auto">{{this.cart.total | currency: 'USD'}}</td>
+                    </ng-template>
+                </p-table>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+            <button pButton pRipple label="Vender" icon="pi pi-shopping-bag" class="p-button-text" [disabled]="this.cart.productos.length === 0" (click)="createVenta()"></button>
+            <button pButton pRipple label="Cerrar" icon="pi pi-times" class="p-button-text" [disabled]="this.cart.productos.length === 0" (click)="hideView()"></button>
+        </ng-template>
+    </p-dialog>
+

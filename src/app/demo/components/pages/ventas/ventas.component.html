@@ -1,0 +1,181 @@
+<div class="col-12">
+    <div class="card">
+        <div class="flex table-header md:flex-row md:justify-content-between">
+        <h5>Ventas</h5>
+        <div class="flex align-items-center">
+            <p-radioButton name="rbOption" value="Activos" [(ngModel)]="optionRadioButton" inputId="rb1" (onClick)="getVentas()"></p-radioButton>
+                <label for="rb1" class="ml-2"> Ventas Activas </label> &nbsp;
+            <p-radioButton name="rbOption" value="Inactivos" [(ngModel)]="optionRadioButton" inputId="rb1" (onClick)="getVentasInactivas()"></p-radioButton>
+                <label for="rb1" class="ml-2"> Ventas Inactivas </label> &nbsp;
+                </div>
+                </div>
+        <p-toast></p-toast>
+        <p-table #dt1 [value]="Ventas" dataKey="id" [rows]="10" [loading]="loading" [rowHover]="true" styleClass="p-datatable-gridlines" [paginator]="true" [globalFilterFields]="['cliente','dui','fechaVenta']" responsiveLayout="scroll">
+            <ng-template pTemplate="caption">
+                <div class="flex justify-content-between flex-column sm:flex-row">
+                    <span class="p-input-icon-left mb-2">
+                        <i class="pi pi-search"></i>
+                        <input pInputText type="text" #filter (input)="onGlobalFilter(dt1, $event)" placeholder="Buscar factura" class="w-full"/>
+                    </span>
+                    <p-button type="button" class="mr-2" (click)="viewReporte()"><i class="pi pi-print mr-2"></i> Generar reporte</p-button>
+                </div>
+            </ng-template>
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="min-width: 12rem">
+                        <div class="flex justify-content-between align-items-center">
+                            Cliente
+                            <p-columnFilter type="text" field="cliente" display="menu" placeholder="Buscar por nombre del cliente"></p-columnFilter>
+                        </div>
+                    </th>
+                    <th style="min-width: 12rem">
+                        <div class="flex justify-content-between align-items-center">
+                            DUI
+                            <p-columnFilter type="text" field="dui" display="menu" placeholder="Buscar por DUI"></p-columnFilter>
+                        </div>
+                    </th>
+                    <th style="min-width: 10rem">
+                        <div class="flex justify-content-between align-items-center">
+                            Numero de factura
+                        </div>
+                    </th>
+                    <th style="min-width: 10rem">
+                        <div class="flex justify-content-between align-items-center">
+                            Fecha de la Venta
+                            <p-columnFilter type="date" field="fechaVenta" display="menu" placeholder="dd/mm/yyyy"></p-columnFilter>
+                        </div>
+                    </th>
+                    <th style="min-width: 8rem">
+                        <div class="flex justify-content-between align-items-center">
+                            Total
+                            <p-columnFilter type="numeric" field="balance" display="menu" currency="USD"></p-columnFilter>
+                        </div>
+                    </th>
+                    <th style="min-width: 8rem">
+                        <div class="flex justify-content-between align-items-center">
+                            Estado
+                        </div>
+                    </th>
+                    <th > <div class="flex justify-content-between align-items-center">
+                        Acciones
+                    </div></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-venta>
+                <tr>
+                    <td>
+                        {{venta.cliente}}
+                    </td>
+                    <td>
+                        {{venta.dui}}
+                    </td>
+                    <td>
+                        {{"000" + venta.numerofactura}}
+                    </td>
+                    <td>
+                        {{venta.fechaVenta | date: 'dd/MM/yyyy'}}
+                    </td>
+                    <td>
+                        {{venta.total | currency:'USD':'symbol'}}
+                    </td>
+                    <td><span [class]="'product-badge status-instock'" [ngClass]="{'status-outofstock' : venta.estado !== 'A'}">{{ venta.estado === 'A' ? 'Activa' : 'Inactiva' }}</span></td>
+                    <td>
+                    <p-button type="button" icon="pi pi-search" class="mr-2 mb-2" (click)="viewDetail(venta)"></p-button>
+                    <p-button type="button" icon="pi pi-trash"  class="mr-2" (click)="showDeleteDialog(venta)"></p-button>
+                    </td>
+                    <td></td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="8">No se encontraron ventas.</td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="loadingbody">
+                <tr>
+                    <td colspan="8">Cargando. Por favor espera.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+
+<p-dialog [(visible)]="FacturaView" [style]="{ width: '550px' }" header="Detalle de venta" [modal]="true" styleClass="p-fluid">
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="name">Cliente:</label>
+            <input type="text" pInputText id="name" placeholder="Nombre del cliente" class="custom-input mb-1" [(ngModel)]="Venta.cliente" required autofocus [disabled]="true" />
+            <!----small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.nombre"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.nombre }} </!-small-->
+        </div>
+        <div class="formgrid grid row">
+            <div class="field col-6">
+                <label for="name">Direccion:</label>
+                <input type="text" pInputText id="name" placeholder="Digite la direccion del cliente" class="custom-input mb-1" [(ngModel)]="Venta.direccion" required autofocus [disabled]="true"/>
+            </div>
+            <div class="field col-6">
+                <label for="name">DUI:</label>
+                <input type="text" pInputText id="name" placeholder="12345678-9" class="custom-input mb-1" [(ngModel)]="Venta.dui" required autofocus [disabled]="true"/>
+            </div>
+        </div>
+        <div class="formgrid grid row">
+            <div class="field col-6">
+                <label for="fechaOrden"><b>Fecha Venta: </b>{{Venta.fechaVenta | date: "EEEE dd/MM/yyyy"}}</label>
+            </div>
+        </div>
+        <div class="formgrid grid">
+            <p-table [value]="detalleVenta" styleClass="p-datatable-gridlines" [tableStyle]="{ 'min-width': '38rem' }">
+                <ng-template pTemplate="caption">Comprado:</ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>SubTotal</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-item>
+                    <tr>
+                        <td>{{item.nombre}}, {{item.descripcion}}</td>
+                        <td>{{item.precioUnitario | currency: 'USD'}}</td>
+                        <td class="text-center">{{item.cantidad}}</td>
+                        <td>{{item.precioUnitario * item.cantidad | currency: 'USD'}}</td>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="summary">
+                    <td colspan="3"><b>Total de la Venta: </b></td>
+                    <td class="right-auto">{{Venta.total | currency: 'USD'}}</td>
+                </ng-template>
+            </p-table>
+        </div>
+    </ng-template>
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Ver factura" icon="pi pi-file-o" class="p-button-text" (click)="showFactura()"></button>
+        <button pButton pRipple label="Cerrar" icon="pi pi-times" class="p-button-text" (click)="hideView()"></button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="viewReport" [style]="{width: '450px'}" header="Generar un reporte" [modal]="true" class="p-fluid">
+    <ng-template pTemplate="content">
+        <div class="field">
+                <label for="name">Fecha Inicio:</label>
+                <input type="date" pInputText id="name" [(ngModel)]="dates.fechaInicio" required autofocus/>
+            <label for="name">Fecha Final:</label>
+            <input type="date" pInputText id="name" [(ngModel)]="dates.fechaFinal" required autofocus/>
+            <button pButton pRipple label="Enviar" icon="pi pi-print" class=" mt-1 btn p-button-primary" [disabled]="dates.fechaInicio === '' || dates.fechaFinal === ''" (click)="generarReporte()"></button>
+        </div>
+        </ng-template>
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="deleteProductDialog" header="Confirmar" [modal]="true" [style]="{width:'450px'}">
+    <div class="flex align-items-center justify-content-center">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span *ngIf="Venta">Esta seguro de desactivar la factura numero <b>000{{Venta.numerofactura}}</b>?</span>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No" (click)="deleteProductDialog = false"></button>
+        <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Si" (click)="Deactivate()"></button>
+    </ng-template>
+</p-dialog>

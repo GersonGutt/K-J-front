@@ -1,0 +1,150 @@
+<div class="grid">
+	<div class="col-12">
+		<div class="card">
+            <div class="flex table-header md:flex-row md:justify-content-between">
+                <h5>Gestion de proveedores</h5><!-- [productoModal]="productoModal"-->
+				<div class="flex align-items-center">
+				<p-radioButton name="rbOption" value="Activos" [(ngModel)]="optionRadioButton" inputId="rb1" (onClick)="getProviders()"></p-radioButton>
+                    <label for="rb1" class="ml-2"> Proveedores Activos </label> &nbsp;
+				<p-radioButton name="rbOption" value="Inactivos" [(ngModel)]="optionRadioButton" inputId="rb1" (onClick)="getProvidersUnabled()"></p-radioButton>
+                    <label for="rb1" class="ml-2"> Proveedores Inactivos </label> &nbsp;
+					</div>
+                </div>
+
+	<div class="col-12">
+		<div class="card">
+			<p-toast></p-toast>
+			<p-table #dt [value]="providers" dataKey="nombre" [expandedRowKeys]="expandedRows" responsiveLayout="scroll" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[10,20,30]" [showCurrentPageReport]="true" currentPageReportTemplate="Proveedores del {first} al {last} de {totalRecords} Proveedores">
+				<ng-template pTemplate="caption">
+					<div class="flex table-header md:flex-row md:justify-content-between">
+                    <button pButton icon="pi pi-fw {{isExpanded ? 'pi-minus' : 'pi-plus'}}" label="{{isExpanded ? 'Reagrupar todos' : 'Expandir todos'}}" (click)="expandAll()"></button>
+					<button pButton icon="pi pi-fw pi-plus" label="Agregar" (click)="openNew()" class="btn p-button-success"></button>
+					</div>
+				</ng-template>
+				<ng-template pTemplate="header">
+					<tr>
+						<th style="width: 3rem"></th>
+						<th pSortableColumn="nombre">Proveedor principal<p-sortIcon field="nombre"></p-sortIcon></th>
+						<th pSortableColumn="telefono">Contacto<p-sortIcon field="telefono"></p-sortIcon></th>
+                        <th pSortableColumn="enterprise">Empresa<p-sortIcon field="enterprise"></p-sortIcon></th>
+						<th pSortableColumn="number">descuento<p-sortIcon field="number"></p-sortIcon></th>
+						<th pSortableColumn="direccion">Domicilio<p-sortIcon field="direccion"></p-sortIcon></th>
+						<th pSortableColumn="inventoryStatus">Estado<p-sortIcon field="inventoryStatus"></p-sortIcon></th>
+                        <th pSortableColumn="acciones">Acciones<p-sortIcon field="acciones"></p-sortIcon></th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-provider let-expanded="expanded">
+					<tr>
+						<td>
+							<button type="button" pButton pRipple [pRowToggler]="provider" class="p-button-text p-button-rounded p-button-plain" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+						</td>
+						<td style="min-width: 12rem;">{{provider.nombre}}</td>
+						<td style="min-width: 12rem;">{{provider.telefono}}</td>
+                        <td style="min-width: 8rem;">{{ provider.empresa }}</td>
+						<td style="min-width: 10rem;">{{ provider.descuento }}%</td>
+						<td style="min-width: 10rem;">{{ provider.direccion }}</td>
+						<td><span [class]="'product-badge status-instock'" [ngClass]="{'status-outofstock' : provider.estado !== 1}">{{ provider.estado === 1 ? 'Activo' : 'Inactivo' }}</span></td>
+                        <td>
+                            <div class="flex">
+                                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editProvider(provider)"></button>
+                                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="ChangeState(provider)"></button>
+                            </div>
+                        </td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="rowexpansion" let-product>
+					<tr>
+						<td colspan="7">
+							<div class="p-3">
+								<p-table #dt [value]="product.productos" dataKey="id" responsiveLayout="scroll"  [rows]="5" [paginator]="true" [rowsPerPageOptions]="[5,10,15]" [showCurrentPageReport]="true" currentPageReportTemplate="Productos del {first} al {last} de {totalRecords} Productos">
+									<ng-template pTemplate="header">
+					<tr>
+						<th pSortableColumn="imagen">Imagen<p-sortIcon field="imagen"></p-sortIcon></th>
+						<th pSortableColumn="nombre">Producto <p-sortIcon field="nombre"></p-sortIcon></th>
+						<th pSortableColumn="precioUnitario">Precio Unitario<p-sortIcon field="precioUnitario"></p-sortIcon></th>
+						<th pSortableColumn="cantidad">cantidad <p-sortIcon field="cantidad"></p-sortIcon></th>
+						<th pSortableColumn="estado">estado <p-sortIcon field="estado"></p-sortIcon></th>
+						<th style="width: 4rem"></th>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="body" let-productos>
+					<tr *ngIf="productos.action !== 'delete'">
+                        <td *ngIf="productos.imagen !== 'null'"><img [src]="'http://localhost:8000/api/images/' + productos.imagen" [alt]="productos.nombre" width="60" class="shadow-4"/></td>
+                        <td *ngIf="productos.imagen === undefined|| product.imagen=== '' ||  product.imagen === 'null'"><img src="assets/demo/images/product/undefined.jpg" alt="no-image" width="60" class="shadow-4"/></td>
+						<td>{{productos.nombre}}</td>
+						<td>{{productos.precioUnitario}}</td>
+						<td>{{productos.cantidad}}</td>
+						<td><span [ngClass]="productos.estado === 'S' ? 'product-badge status-instock' : (productos.estado === 'O' ? 'product-badge status-outofstock' : 'product-badge status-lowstock')">{{
+                            productos.estado === 'S' ? 'Disponible' :
+                            productos.estado === 'O' ? 'Sin existencias' :
+                            productos.estado === 'L' ? 'Pocas existencias' :
+                            '' }}</span></td>
+						<td><p-button type="button" icon="pi pi-search" (click)="sendProduct(productos)"></p-button></td>
+					</tr>
+				</ng-template>
+				<ng-template pTemplate="emptymessage">
+					<tr>
+						<td colspan="6">Este proveedor no suministra ningun producto aun.</td>
+					</tr>
+				</ng-template>
+			</p-table>
+		</div>
+		</td>
+		</tr>
+		</ng-template>
+		</p-table>
+        <app-products [product]="product"></app-products>
+        <p-dialog [(visible)]="productDialog" [style]="{width: '750px','max-width': '750px'}" header="Agregar Proveedor" [modal]="true" class="p-fluid">
+            <ng-template pTemplate="content">
+                <div class="field">
+                    <label for="name">Nombre del proveedor principal</label>
+                    <input type="text" pInputText id="name" [(ngModel)]="provider.nombre" class="mb-1" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !provider.nombre}"/>
+                    <small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.nombre"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.nombre }} </small>
+                </div>
+                <div class="field">
+                    <label for="name">Domicilio</label>
+                    <input type="text" pInputText id="name" [(ngModel)]="provider.direccion" class="mb-1" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !provider.direccion}"/>
+					<small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.direccion"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.direccion }} </small>
+                </div>
+                <div class="field">
+                    <label for="name">Nombre de la empresa</label>
+                    <input type="text" pInputText id="name" [(ngModel)]="provider.empresa" class="mb-1" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !provider.empresa}"/>
+					<small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.empresa"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.empresa }} </small>
+                </div>
+                <div class="formgrid grid">
+                    <div class="field col">
+                        <label for="name">Contacto</label>
+                        <input type="text" pInputText id="name" [(ngModel)]="provider.telefono" class="mb-1" required autofocus [ngClass]="{'ng-invalid ng-dirty' : submitted && !provider.telefono}"/>
+						<small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.telefono"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.telefono }} </small>
+                    </div>
+                    <div class="field col">
+                        <label for="quantity">Descuento</label>
+                        <p-inputNumber id="quantity" class="mb-1" [(ngModel)]="this.quantity">%</p-inputNumber>
+						<small class="ng-dirty ng-invalid bg-red-400 border-round text-white p-1" *ngIf="errors!.descuento"> <i class="pi pi-exclamation-circle ml-2"></i> {{ this.errors?.descuento }} </small>
+                    </div>
+                </div>
+                <h5>Agregar Productos</h5>
+                <p-autoComplete [(ngModel)]="selected" [suggestions]="filteredCountries" (completeMethod)="filterCountry($event)" field="nombre" [dropdown]="true" (ngModelChange)="onChange(selected)" appendTo="body">
+                </p-autoComplete>
+				<div class="container border-gray-400 border-1 border-round p-2" [style]="{width: '94.3%', 'max-height': '200px', 'overflow': 'auto'}">
+					<li *ngIf="!selectedProducts.length"  [style]="{'list-style': 'none'}" >No ha seleccionado ningun producto</li>
+                        <ng-container *ngFor="let product of selectedProducts">
+                        <div class="flex align-items-center gap-4 border-gray-400 border-1 border-round" *ngIf="product.action !== 'delete'">
+                            <img [src]="'http://localhost:8000/api/images/' + product.imagen" [alt]="" style="width: 60px; height: 60px;" class="border-round" *ngIf="product.imagen !== 'null'"/>
+                            <img src="assets/demo/images/product/undefined.jpg" alt="no-image" style="width: 60px; height: 60px;" class="border-round"  *ngIf="product.imagen === undefined|| product.imagen=== '' ||  product.imagen === 'null'"/>
+                            <div>Producto: {{ product.nombre }}, Precio: ${{ product.precioUnitario }}, Categoria: {{ product.categoria.nombre }}</div>
+                            <button pButton pRipple icon="pi pi-times" class="p-button-rounded p-button-danger mr-2" style="margin-left: auto" (click)="quitarItemEdit(product)" *ngIf="provider.editar"></button>
+                            <button pButton pRipple icon="pi pi-times" class="p-button-rounded p-button-danger mr-2" style="margin-left: auto" (click)="quitarItem(product)" *ngIf="!provider.editar"></button>
+                        </div>
+                    </ng-container>
+				</div>
+                        </ng-template>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+                <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" (click)="saveProvider()"></button>
+            </ng-template>
+        </p-dialog>
+	</div>
+	</div>
+    <p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
+</div>
