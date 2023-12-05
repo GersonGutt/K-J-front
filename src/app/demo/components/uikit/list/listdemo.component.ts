@@ -178,6 +178,15 @@ export class ListDemoComponent implements OnInit {
        });
        this.cart.productos.splice(index,1);
     }
+
+    viewReporte(){
+        this.productService.Report().subscribe(json =>{
+            const blob = new Blob([json], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, '_blank');
+        })
+    }
+
     createVenta(){
         console.log("hola");
         this.VentaService.Create(this.cart).subscribe(json => {

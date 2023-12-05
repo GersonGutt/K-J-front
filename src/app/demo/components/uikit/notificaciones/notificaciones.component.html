@@ -1,73 +1,67 @@
 
-                                
-    
+
+
     <div class="container" style="max-width: 500px; margin: 0 auto; overflow: hidden;">
         <div class="card" >
             <p-toast></p-toast>
-          
+
             <p-table
             #dt
-            
+
             [value]="notificaciones"
-            [rows]="5"
-            [paginator]="true"
+            [rows]="3"
             [globalFilterFields]="['nombre']"
-            [tableStyle]="{ 'min-width': '10rem', 'height': 'auto','overflow': 'hidden'}"
+            [tableStyle]="{ 'min-width': '5rem', 'height': 'auto','overflow': 'hidden'}"
             [(selection)]="selectedNotificacions"
             [rowHover]="true"
             dataKey="id"
-            currentPageReportTemplate=" {first} al {last} de {totalRecords} "
-            [showCurrentPageReport]="true"
-            [style]="{'width': '400px','height':'550px','overflow': 'hidden' }">
-           
+            [style]="{'width': '400px','height':'320px','overflow': 'hidden' }">
+
         >
-           
+
             <ng-template pTemplate="body" let-notificacion >
                 <tr >
-                   
+
                     <p-overlayPanel #op [style]="{'width': '500px'}" [showCloseIcon]="true" >
                         <div style="word-wrap: break-word;">
                             <label>{{ notificacion.notificacion }}</label>
-                           
+
                           </div>
-                        </p-overlayPanel>  
+                        </p-overlayPanel>
                         <div style="overflow: hidden; padding: 8px;  min-width: 6rem;" >
-                            
+
                      <button class="p-link layout-topbar-button"  style="width: 300px; word-wrap: break-word;" (click)="op.toggle($event); editCategoria(notificacion) " >
-                       
+
                             <td >{{ notificacion.notificacion }}</td>
-                       
-        
-                        
+
+
+
                      </button>
                     </div>
-                    
+
 
                 </tr>
-                <tr>  
+                <tr>
                     <td style="width:14%; min-width: 10rem;"><span [ngClass]="
                     notificacion.is_readed === 1 ? 'product-badge status-instock' :
                     (notificacion.is_readed === 0 ? 'product-badge status-outofstock' :
                     'product-badge status-lowstock')">
                     {{
                         notificacion.is_readed === 1 ? 'Leido' :
-                           
+
                             notificacion.is_readed === 0 ? 'No leido' :
                             '' }}</span>
                     </td>
                 </tr>
             </ng-template>
-            <ng-template pTemplate="summary">
-            <div class="flex align-items-center justify-content-between">Existen  {{ notificaciones ? notificaciones.length : 0 }} Notificaciones.</div>
-        </ng-template>
         </p-table>
-    
-        
+
+
         </div>
-       
-    
-       
-      
+
+
+
+
     </div>
- 
+
 

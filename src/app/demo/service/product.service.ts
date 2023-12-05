@@ -73,4 +73,7 @@ export class ProductService {
       DeleteDetail(detalle: detalleProducto):Observable<any> {
         return this.http.post('http://127.0.0.1:8000/api/deletedetail/', detalle);
       }
+      Report(): Observable<Blob> { // Cambia el tipo a Blob
+        return this.http.get('http://127.0.0.1:8000/api/product/report', { responseType: 'blob' }); // Configura el responseType como 'blob'
+      }
 }
