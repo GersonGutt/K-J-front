@@ -97,6 +97,10 @@ export class CrudComponent implements OnInit {
         });
     }
 
+    addnewsdetails():void{
+
+    }
+
     openNew() {
         this.unsetProduct();
         this.submitted = false;

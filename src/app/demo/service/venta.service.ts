@@ -44,5 +44,10 @@ getLatest(): Observable<any>{
     return this.http.get<any>('http://127.0.0.1:8000/api/getLatest');
 }
 
+Facturacorreo(venta: Venta): Observable<Blob> { // Cambia el tipo a Blob
+    return this.http.post('http://127.0.0.1:8000/api/venta/reportemail', venta, { responseType: 'blob' }); // Configura el responseType como 'blob'
+  }
+
+
 
 }

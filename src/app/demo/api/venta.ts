@@ -5,6 +5,8 @@ export interface Venta {
     direccion:string;
     dui:string;
     total:number;
+    observaciones?: string;
+    gmail?: string;
     fechaVenta:Date;
     productos: Producto[];
 }

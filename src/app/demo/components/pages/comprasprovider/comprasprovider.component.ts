@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnChanges, OnInit } from '@angular/core';
 import { ConfirmationService, SelectItem } from 'primeng/api';
 import { DataView } from 'primeng/dataview';
 import { MessageService } from 'primeng/api';
@@ -8,9 +8,12 @@ import { Producto } from 'src/app/demo/api/producto';
 import { ProductService } from 'src/app/demo/service/product.service';
 import { Venta } from 'src/app/demo/api/venta';
 import { VentaService } from '../../../service/venta.service';
+import { Proveedor } from 'src/app/demo/api/Proveedor';
+import { ProviderService } from '../../../service/provider.service';
+import { CompraService } from '../../../service/compra.service';
 
 @Component({
-    templateUrl: './listdemo.component.html',
+    templateUrl: './comprasprovider.component.html',
     styles: [`
     .image-container {
       width: 9rem;
@@ -31,11 +34,28 @@ import { VentaService } from '../../../service/venta.service';
 `],
 providers: [MessageService, ConfirmationService]
 })
-export class ListDemoComponent implements OnInit {
+
+export class ComprasProviderComponent {
+
+    providersModal: boolean = false;
+
+    cantidad:number = 0;
+
+    submitted:boolean = false;
+
+    proveedoresId!: Proveedor[];
 
     products: Producto[] = [];
 
     sortOptions: SelectItem[] = [];
+
+    detalleModal: detalleProducto ={
+        id: 0,
+        reservado: 0,
+        estado: 0,
+        cantidad: 0,
+        show: false
+     }
 
     selectedDetail: detalleProducto[] = [];
 
@@ -78,7 +98,8 @@ export class ListDemoComponent implements OnInit {
         cliente: null,
         dui: null,
     }
-    constructor(private productService: ProductService, private messageService: MessageService, private VentaService: VentaService, private confirmationService: ConfirmationService) { }
+
+    constructor(private productService: ProductService,private CompraService:CompraService ,private ProviderService: ProviderService ,private messageService: MessageService, private VentaService: VentaService, private confirmationService: ConfirmationService) { }
 
     ngOnInit() {
         this.productService.getProductosWithDetail().then(data => this.products = data).then(json => console.log(json));
@@ -87,6 +108,28 @@ export class ListDemoComponent implements OnInit {
             { label: 'Price Low to High', value: 'price' }
         ];
     }
+
+    addNewDetails(){
+
+    }
+
+    getProvidersByProductoId(){
+        this.ProviderService.getProvidersByProductoId(this.detalleModal.producto!).subscribe(response =>{
+            this.proveedoresId = response;
+        });
+    }
+
+    hideDetailDialog(){
+        this.providersModal = false;
+        this.detalleModal.proveedor = {
+          nombre: '',
+          empresa: '',
+          telefono: '',
+          direccion: '',
+          descuento: 0,
+          estado: 0
+      }
+      }
 
     onSortChange(event: any) {
         const value = event.value;
@@ -106,6 +149,8 @@ export class ListDemoComponent implements OnInit {
 
     openNew(producto: Producto){
         this.product = producto;
+        this.detalleModal.producto = this.product;
+        this.getProvidersByProductoId();
         this.addProductModal = true;
     }
 
@@ -113,8 +158,12 @@ export class ListDemoComponent implements OnInit {
         this.addProductModal = false;
         this.selectedDetail = [];
         this.cartView = false;
+        this.detalleModal.cantidad = 0;
     }
     addToCart(){
+        this.selectedDetail[0] = this.detalleModal;
+        this.product.proveedor = this.detalleModal.proveedor;
+        this.selectedDetail[0].producto = { ...this.product };
         console.log(this.cart.productos.findIndex(item => item.id === this.selectedDetail[0].producto?.id));
         if(this.cart.productos.findIndex(item => item.id === this.selectedDetail[0].producto?.id) === -1){
             var producto = this.selectedDetail[0].producto!
@@ -124,20 +173,21 @@ export class ListDemoComponent implements OnInit {
                 detail.producto = undefined;
             });
             this.cart.productos = this.cart.productos.concat(producto);
-            producto.cantidad = producto.cantidad - this.selectedDetail.length;
+            producto.cantidad = this.detalleModal.cantidad;
         }else{
             var index = this.cart.productos.findIndex(item => item.id === this.selectedDetail[0].producto?.id);
             this.selectedDetail.forEach(detail => {
                 detail.producto = undefined;
             });
             this.cart.productos[index].detalle_producto = this.cart.productos[index].detalle_producto?.concat(this.selectedDetail);
-            this.cart.productos[index].cantidad = this.cart.productos[index].cantidad - this.selectedDetail.length;
+            this.cart.productos[index].cantidad = this.cart.productos[index].cantidad + this.detalleModal.cantidad;
         }
         this.selectedDetail.forEach(detail => {
         this.product.detalle_producto = this.product.detalle_producto?.filter(val => val.id !== detail.id)
         });
-        this.cart.total = this.cart.total + this.product.precioUnitario * this.selectedDetail.length;
-        this.product.cantidad = this.product.cantidad - this.selectedDetail.length;
+        this.cart.total = this.cart.total + this.product.precioUnitario * this.detalleModal.cantidad;
+        console.log(this.product.cantidad, this.detalleModal.cantidad);
+        this.product.cantidad = this.product.cantidad + this.detalleModal.cantidad;
         this.product.estado = 'S';
         if(this.product.cantidad <= 5){
           this.product.estado = 'L'
@@ -148,6 +198,7 @@ export class ListDemoComponent implements OnInit {
         this.selectedDetail = [];
         this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Añadido al carrito', life: 3000 });
         this.addProductModal = false;
+        this.detalleModal.cantidad = 0;
         console.log(this.cart);
     }
 
@@ -158,10 +209,7 @@ export class ListDemoComponent implements OnInit {
     deleteItem(producto: Producto){
        var index = this.cart.productos.findIndex(item => item.id === producto.id);
        var i = this.products.findIndex(item => item.id == producto.id)
-       producto.detalle_producto!.forEach(detail => {
-        this.products[i].detalle_producto = this.products[i].detalle_producto?.concat(detail);
-       });
-       var cantidad = this.products[i].cantidad + producto.detalle_producto?.length!;
+       var cantidad = this.products[i].cantidad - producto.cantidad;
        this.products[i].cantidad = cantidad;
        var estado = 'S';
        if(cantidad <=5){
@@ -170,8 +218,8 @@ export class ListDemoComponent implements OnInit {
        if(cantidad == 0){
         estado = 'O';
        }
-       this.cart.total = this.cart.total - (producto.precioUnitario * producto.detalle_producto?.length!);
-       this.cart.productos[index].cantidad = this.cart.productos[index].cantidad + producto.detalle_producto?.length!;
+       this.cart.total = this.cart.total - (producto.precioUnitario * producto.cantidad!);
+       this.cart.productos[index].cantidad = this.cart.productos[index].cantidad + producto.cantidad!;
        this.products[i].estado = estado;
        producto.detalle_producto!.forEach(detail => {
         detail.producto = producto;
@@ -189,24 +237,11 @@ export class ListDemoComponent implements OnInit {
 
     createVenta(){
         console.log("hola");
-        this.VentaService.Create(this.cart).subscribe(json => {
+        this.CompraService.Create(this.cart).subscribe(json => {
             if(json.status == 'ok'){
                 console.log("entre");
                 console.log(json);
-                this.messageService.add({severity: 'success', summary: 'Confirmado', detail: `${json.message}`, life: 3000});
-                this.confirmationService.confirm({
-                    message: 'Venta realizada con exito, ¿deseas enviar la factura al correo proporcionado?',
-                    header: 'Confirmar',
-                    icon: 'pi pi-exclamation-triangle',
-                    accept: () => {
-                        console.log(json);
-                        this.VentaService.Facturacorreo(json.data).subscribe(json =>{
-                            const blob = new Blob([json], { type: 'application/pdf' });
-                            const url = window.URL.createObjectURL(blob);
-                            window.open(url, '_blank');
-                        })
-                    }
-                });
+                this.messageService.add({severity: 'success', summary: 'Confirmado', detail: 'Compra creada con exito', life: 3000});
                 this.cartView = false
                 this.cart = {
                     cliente: "",
@@ -224,4 +259,6 @@ export class ListDemoComponent implements OnInit {
                 }
         });
     }
+
 }
+

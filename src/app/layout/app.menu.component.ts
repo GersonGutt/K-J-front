@@ -8,6 +8,10 @@ import { LayoutService } from './service/app.layout.service';
 })
 export class AppMenuComponent implements OnInit {
 
+    cerrarSesion(){
+        console.log('hola')
+    }
+
     model: any[] = [];
 
     constructor(public layoutService: LayoutService) { }
@@ -31,12 +35,13 @@ export class AppMenuComponent implements OnInit {
                     //{ label: 'Button', icon: 'pi pi-fw pi-box', routerLink: ['/uikit/button'] },
                     //{ label: 'Table', icon: 'pi pi-fw pi-table', routerLink: ['/uikit/table'] },
                     { label: 'Productos', icon: 'pi pi-fw pi-list', routerLink: ['/uikit/productos'] },
+                    { label: 'Compras proveedores', icon: 'pi pi-fw pi-users', routerLink: ['/pages/comprasprovider'] },
                     { label: 'Ventas', icon: 'pi pi-fw pi-money-bill', routerLink: ['/pages/ventas'] },
                     { label: 'Compras', icon: 'pi pi-fw pi-shopping-cart', routerLink: ['/pages/compras'] },
                     { label: 'Gestión de Proveedores', icon: 'pi pi-fw pi-users', routerLink: ['/uikit/providers'] },
                     { label: 'Inventario', icon: 'pi pi-fw pi-pencil', routerLink: ['/pages/crud'] },
                     { label: 'Perfil', icon: 'pi pi-fw pi-user', routerLink: ['/uikit/perfil'] },
-                    { label: 'Cerrar sesión', icon: 'pi pi-fw pi-sign-out', routerLink: ['/auth/login'] },
+                    { label: 'Cerrar sesión', icon: 'pi pi-fw pi-sign-out', routerLink: ['/auth/login'], command: () => this.cerrarSesion() },
 
                    // { label: 'Tree', icon: 'pi pi-fw pi-share-alt', routerLink: ['/uikit/tree'] },
                    // { label: 'Panel', icon: 'pi pi-fw pi-tablet', routerLink: ['/uikit/panel'] },
